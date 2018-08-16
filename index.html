@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>iTunes API Tutorial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="stylesheet.css">
+
+    <link rel="shortcut icon" href="http://findicons.com/files/icons/2770/ios_7_icons/512/music.png">
+</head>
+
+<body>
+    <nav>
+        <div class="nav-wrapper black">
+            <form>
+                <div class="input-field">
+                    <input id="search" type="search" required>
+                    <label class="label-icon" for="search">
+                        <i class="material-icons">search</i>
+                    </label>
+                    <i class="material-icons">close</i>
+                </div>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <h1 class="center">ITUNES FOR CATS</h1>
+        <ul class="collection with-header">
+            <li class="collection-header">
+                <h4>Rock</h4>
+            </li>
+            <a class="collection-item">
+                <div>Rolling Stones</div>
+            </a>
+            <a class="collection-item">
+                <div>Chuck Berry</div>
+            </a>
+            <a class="collection-item">
+                <div>Led Zeplin</div>
+            </a>
+            <a class="collection-item">
+                <div>The Beatles</div>
+            </a>
+
+            <li class="collection-header">
+                <h4>Pop</h4>
+            </li>
+            <a class="collection-item">
+                <div>Katy Perry</div>
+            </a>
+            <a class="collection-item">
+                <div>Taylor Swift</div>
+            </a>
+            <a class="collection-item">
+                <div>Arianna Grande</div>
+            </a>
+            <a class="collection-item">
+                <div>Britney Spears</div>
+            </a>
+
+            <li class="collection-header">
+                <h4>Country</h4>
+            </li>
+            <a class="collection-item">
+                <div>Taylor Swift</div>
+            </a>
+            <a class="collection-item">
+                <div>Rascal Flats</div>
+            </a>
+            <a class="collection-item">
+                <div>Luke Brian</div>
+            </a>
+            <a class="collection-item">
+                <div>Garth Brooks</div>
+            </a>
+        </ul>
+
+
+        <div id="songs" class="row">
+        </div>
+        <img src="http://www.pampurrs.co.uk/img/cat-load.gif" alt="loading" class="loading">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+
+    <script>
+        // $(document).ready(... This is jQuery function that runs when the page is loaded.
+        // Do you want to load when the page is ready or when some button is clicked?
+        // Are you waiting for an input from the user???
+        $(document).ready(function () {
+            $(".loading").hide()
+            $("form").submit(function (event) {
+                event.preventDefault();
+
+                var userinput = $("#search").val();
+                $("form")[0].reset();
+                $("input").blur();
+                searchitunes(userinput)
+            })
+
+            $(".collection-item").click(function () {
+                $(".collection-item").removeClass("active")
+                $(this).addClass("active")
+                searchitunes($(this).find("div").html());
+
+            })
+
+            function searchitunes(artists) {
+                $("#songs").html("<h2>Results</h2>")
+                $(".loading").show()
+                $('html, body').animate({
+                    scrollTop: $("#songs").offset().top
+                }, 1200)
+
+                $.ajax({
+                    url: "http://itunes.apple.com/search?term=" + artists,
+                    dataType: 'JSONP'
+                })
+                    .done(function (data) {
+                        console.log(data);
+                        $(".loading").hide()
+                        // add code for when response from apple comes back.
+                        for (var i = 0; i < data.results.length; i++) {
+                            if (data.results[i].trackName) {
+                                data.results[i].artworkUrl100 = data.results[i].artworkUrl100.replace("100x100bb", "500x500bb")
+                                $('#songs').append(`
+                            <div class="col s12 m4">
+                                <div class="card large">
+                                    <div class="card-image">
+                                    <img src="${data.results[i].artworkUrl100}">
+                                    </div>
+                                    <div class="card-content">
+                                        <span class="card-title">${data.results[i].trackName}</span>
+                                    <p> Album Name: ${data.results[i].collectionName} <br>
+                                    Artist: ${data.results[i].artistName}</p>
+                                    </div>
+                                    <div class="card-action">
+                                    <a href="${data.results[i].collectionViewUrl}">Buy now!</a>
+                                    </div>
+                                </div>
+                            </div>
+                            `)
+
+                            }
+                        }
+                    })
+                    .fail(function (data) {
+                        console.log(data);
+                        $(".loading").hide()
+                        $('#songs').append(`<h2> error code : ${data.status}<br>
+                        <img class= "error" src="https://i.chzbgr.com/full/8799610880/hDA81F502/">`); 
+                    })
+            }
+        });// End of on ready part
+
+
+    </script>
+</body>
+
+</html>
